@@ -1,3 +1,6 @@
+*** NOTE: (September 27 2004) This program is not yet ready for use.
+*** It will be a few more days, and I will take down this note when ready for public use.
+
 Chemical Calculator (ChemCalc) is an application that calculates the amount of reagents to 
 use when mixing up chemical solutions.
 
