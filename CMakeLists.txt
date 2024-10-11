@@ -9,8 +9,11 @@ set(CMAKE_AUTORCC ON)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-find_package(QT NAMES Qt6 REQUIRED COMPONENTS Core Widgets PrintSupport Sql Gui Network Xml KF6Config)
+find_package(QT NAMES Qt6 REQUIRED COMPONENTS Core Widgets PrintSupport Sql Gui Network Xml)
 find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Core Widgets PrintSupport Sql Gui Network Xml)
+find_package(KF6Config)
+find_package(KF6CoreAddons)
+find_package(KF6DBusAddons)
 
 set(PROJECT_SOURCES
         main.cpp
@@ -56,7 +59,7 @@ target_link_libraries(chemcalc PRIVATE Qt${QT_VERSION_MAJOR}::Gui)
 target_link_libraries(chemcalc PRIVATE Qt${QT_VERSION_MAJOR}::Network)
 target_link_libraries(chemcalc PRIVATE Qt${QT_VERSION_MAJOR}::Xml)
 
-# target_link_libraries(chemcalc KF6::ConfigCore KF6::ConfigGui) // Doesn't work.
+target_link_libraries(chemcalc PRIVATE KF6::ConfigCore KF6::ConfigGui KF6::CoreAddons KF6::DBusAddons)
 
 
 # Qt for iOS sets MACOSX_BUNDLE_GUI_IDENTIFIER automatically since Qt 6.1.

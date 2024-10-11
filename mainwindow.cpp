@@ -32,6 +32,7 @@
 #include <QAbstractItemView>
 #include <QAbstractTableModel>
 #include <QDesktopServices>
+#include <QGuiApplication> //?
 #include <QUrl>
 #include <QStandardPaths>
 #include <QList>
@@ -66,6 +67,7 @@
 #include "ui_about_dialog.h"
 #include "ui_select_dialog.h"
 
+#include <KAboutData>
 // #include <KDesktopFile>
 // #include <KConfigBase>
 // #include <KConfigGroup>
@@ -87,12 +89,18 @@ MainWindow::MainWindow(QWidget *parent)
     ui->setupUi(this);
 
     setWindowTitle("Chemical Calculator");
-    // No errors below, but it doesn't work (set window icon).
-    // QIcon myIcon;
-    // QIcon myIcon = QIcon(":/Icons/ChemCalc_icon_120.svg");
-    // setWindowIcon(myIcon);
+
+    // //Set window icon. No errors below, but it doesn't work.
+    QIcon myIcon = QIcon(":/Icons/ChemCalc_icon_120.svg");
+    QWindow Obj;
+    Obj.setIcon(myIcon);
+    // QWindow::setIcon(QIcon(":/Icons/ChemCalc_icon_120.png"));
+    // setWindowIcon(QIcon(":/Icons/ChemCalc_icon_120.png"));
+    // // Below line doesn't work in Wayland!!!
+    // // SEE https://stackoverflow.com/questions/78256166/app-icon-ws-on-qt6-6-and-wayland-in-a-flatpak-on-kde-neon
+    // // Try QGuiApplication Class!!
     // MainWindow::setWindowIcon(QIcon(":/Icons/ChemCalc_icon_120.png"));
-    // setIcon(QIcon(":/Icons/ChemCalc_icon_120.png"));
+    // setDesktopFileName("chemcalc");
 
     // Runs once at start, to setup file locations, database, config files etc.
     runAtStart();
