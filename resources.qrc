@@ -6,9 +6,8 @@
         <file>ChemCalc_help1.md</file>
         <file>ChemCalc_Screen_Capture.png</file>
         <file>ChemCalc.conf</file>
+        <file>chemcalc_icon_120.png</file>
+        <file>chemcalc_icon_120.svg</file>
     </qresource>
-    <qresource prefix="/Icons">
-        <file>ChemCalc_icon_120.svg</file>
-        <file>ChemCalc_icon_120.png</file>
-    </qresource>
+    <qresource prefix="/Icons"/>
 </RCC>

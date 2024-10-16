@@ -91,15 +91,15 @@ MainWindow::MainWindow(QWidget *parent)
     setWindowTitle("Chemical Calculator");
 
     // //Set window icon. No errors below, but it doesn't work.
-    QIcon myIcon = QIcon(":/Icons/ChemCalc_icon_120.svg");
+    QIcon myIcon = QIcon(":/chemcalc_icon_120.svg");
     QWindow Obj;
     Obj.setIcon(myIcon);
-    // QWindow::setIcon(QIcon(":/Icons/ChemCalc_icon_120.png"));
-    // setWindowIcon(QIcon(":/Icons/ChemCalc_icon_120.png"));
+    // QWindow::setIcon(QIcon(":chemcalc_icon_120.png"));
+    // setWindowIcon(QIcon(":chemcalc_icon_120.png"));
     // // Below line doesn't work in Wayland!!!
     // // SEE https://stackoverflow.com/questions/78256166/app-icon-ws-on-qt6-6-and-wayland-in-a-flatpak-on-kde-neon
     // // Try QGuiApplication Class!!
-    // MainWindow::setWindowIcon(QIcon(":/Icons/ChemCalc_icon_120.png"));
+    // MainWindow::setWindowIcon(QIcon(":/chemcalc_icon_120.png"));
     // setDesktopFileName("chemcalc");
 
     // Runs once at start, to setup file locations, database, config files etc.

@@ -32,6 +32,7 @@ if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
         select_dialog.h select_dialog.cpp select_dialog.ui
         about_dialog.h about_dialog.cpp about_dialog.ui
         COPYING.txt
+        chemcalc.desktop
     )
 # Define target properties for Android with Qt 6 as:
 #    set_property(TARGET chemcalc APPEND PROPERTY QT_ANDROID_PACKAGE_SOURCE_DIR
@@ -76,12 +77,17 @@ set_target_properties(chemcalc PROPERTIES
     WIN32_EXECUTABLE TRUE
 )
 
-include(GNUInstallDirs)
+# See https://cmake.org/cmake/help/latest/module/GNUInstallDirs.html
+include(GNUInstallDirs)  # Provides prefix ('/usr' for my linux) for below lines.
 install(TARGETS chemcalc
-    BUNDLE DESTINATION .
-    LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
-    RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
+    BUNDLE DESTINATION .  # Used only on macOS.
+    LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}  # /usr/lib for me (prefix+/lib)
+    RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}  # /usr/bin for me (prefix+/bin)
 )
+# See https://cmake.org/cmake/help/latest/command/install.html#files
+install(FILES chemcalc.desktop
+    # Defaults to '/usr/share'+/applications on my linux.
+    DESTINATION ${CMAKE_INSTALL_DATADIR}/applications)
 
 if(QT_VERSION_MAJOR EQUAL 6)
     qt_finalize_executable(chemcalc)
