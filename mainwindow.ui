@@ -14,15 +14,8 @@
    <string>MainWindow</string>
   </property>
   <property name="windowIcon">
-   <iconset theme="ChemCalc" resource="resources.qrc">
-    <normaloff>:/Icons/ChemCalc_icon_120.svg</normaloff>
-    <normalon>:/Icons/ChemCalc_icon_120.svg</normalon>
-    <disabledoff>:/Icons/ChemCalc_icon_120.svg</disabledoff>
-    <disabledon>:/Icons/ChemCalc_icon_120.svg</disabledon>
-    <activeoff>:/Icons/ChemCalc_icon_120.svg</activeoff>
-    <activeon>:/Icons/ChemCalc_icon_120.svg</activeon>
-    <selectedoff>:/Icons/ChemCalc_icon_120.svg</selectedoff>
-    <selectedon>:/Icons/ChemCalc_icon_120.svg</selectedon>:/Icons/ChemCalc_icon_120.svg</iconset>
+   <iconset resource="resources.qrc">
+    <normaloff>:/chemcalc_icon_120.svg</normaloff>:/chemcalc_icon_120.svg</iconset>
   </property>
   <widget class="QWidget" name="centralwidget">
    <widget class="QGroupBox" name="groupBox_1_StartingReagent">

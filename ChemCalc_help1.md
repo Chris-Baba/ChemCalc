@@ -18,6 +18,4 @@ Example 1) Calculate how much Sodium Chloride (1 Molar stock solution / MW = 58.
 > 
 > If your answer looks correct you should click on the **'Add To Print List'** button to save or print. 
 
-![myImage](qrc:/ChemCalc_Screen_Capture.png)
-
 Continue with any other reagents you want to add and click **'Add To Print List'** after each one is calculated.  Then click on the **'Show, Print, or Save Print List'** button to view all of your results.

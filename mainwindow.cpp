@@ -67,17 +67,7 @@
 #include "ui_about_dialog.h"
 #include "ui_select_dialog.h"
 
-#include <KAboutData>
-// #include <KDesktopFile>
-// #include <KConfigBase>
-// #include <KConfigGroup>
-
-//-----------DELETE?-----------------------------
-// Initial definitions for static variables.
-// Title only, for now // initial definition, (initial declaration is in header file (MainWindow.h)).
-// QString MainWindow::g_print_text = "Chemical Calculator Results: \n";
-// QString mPrintDialog::g_print_text = "Chemical Calculator Results: \n";
-
+// Declare some variables.
 QString MainWindow::g_dataBaseFilePath = "";
 QString MainWindow::g_configFilePath = "";
 //---------------------------------------
@@ -89,19 +79,6 @@ MainWindow::MainWindow(QWidget *parent)
     ui->setupUi(this);
 
     setWindowTitle("Chemical Calculator");
-
-    // //Set window icon. No errors below, but it doesn't work.
-    QIcon myIcon = QIcon(":/chemcalc_icon_120.svg");
-    QWindow Obj;
-    Obj.setIcon(myIcon);
-    // QWindow::setIcon(QIcon(":chemcalc_icon_120.png"));
-    // setWindowIcon(QIcon(":chemcalc_icon_120.png"));
-    // // Below line doesn't work in Wayland!!!
-    // // SEE https://stackoverflow.com/questions/78256166/app-icon-ws-on-qt6-6-and-wayland-in-a-flatpak-on-kde-neon
-    // // Try QGuiApplication Class!!
-    // MainWindow::setWindowIcon(QIcon(":/chemcalc_icon_120.png"));
-    // setDesktopFileName("chemcalc");
-
     // Runs once at start, to setup file locations, database, config files etc.
     runAtStart();
 }
@@ -170,6 +147,7 @@ bool MainWindow::checkForDataBase()
             // Set permissions.
             int myPermissions = (QFileDevice::ReadOwner | QFileDevice::WriteOwner | QFileDevice::ReadUser | QFileDevice::WriteUser);
             bool permissionsSetOK = myDB.setPermissions(QFileDevice::Permissions(myPermissions));
+            qDebug() << "In checkForDatabase(), permissionsSetOK = " << permissionsSetOK;
             return true;
         }
         if (!fileCopyOK){

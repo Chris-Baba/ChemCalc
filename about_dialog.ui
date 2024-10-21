@@ -48,7 +48,7 @@
       <string/>
      </property>
      <property name="pixmap">
-      <pixmap resource="resources.qrc">:/Icons/ChemCalc_icon_120.svg</pixmap>
+      <pixmap resource="resources.qrc">:/chemcalc_icon_120.svg</pixmap>
      </property>
     </widget>
     <widget class="QLabel" name="label">
@@ -156,7 +156,7 @@ li.checked::marker { content: &quot;\2612&quot;; }
       <string/>
      </property>
      <property name="pixmap">
-      <pixmap resource="resources.qrc">:/Icons/ChemCalc_icon_120.svg</pixmap>
+      <pixmap resource="resources.qrc">:/chemcalc_icon_120.svg</pixmap>
      </property>
     </widget>
     <widget class="QLabel" name="label_3">

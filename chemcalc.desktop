@@ -12,3 +12,7 @@ TryExec=chemcalc
 Type=Application
 Version=1.0
 X-KDE-SubstituteUID=false
+#####################
+# Testing number 001
+# On my linux computer this file is located at:
+# /usr/share/applications/chemcalc.desktop

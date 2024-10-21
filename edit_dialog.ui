@@ -15,7 +15,7 @@
   </property>
   <property name="windowIcon">
    <iconset resource="resources.qrc">
-    <normaloff>:/Icons/ChemCalc_icon_120.svg</normaloff>:/Icons/ChemCalc_icon_120.svg</iconset>
+    <normaloff>:/chemcalc_icon_120.svg</normaloff>:/chemcalc_icon_120.svg</iconset>
   </property>
   <widget class="QLabel" name="label">
    <property name="geometry">
@@ -83,7 +83,7 @@
     <item>
      <spacer name="horizontalSpacer">
       <property name="orientation">
-       <enum>Qt::Horizontal</enum>
+       <enum>Qt::Orientation::Horizontal</enum>
       </property>
       <property name="sizeHint" stdset="0">
        <size>
