@@ -308,7 +308,7 @@ li.checked::marker { content: &quot;\2612&quot;; }
         <item>
          <widget class="QLineEdit" name="lineEdit_DesiredVolume">
           <property name="text">
-           <string>250</string>
+           <string>500</string>
           </property>
           <property name="alignment">
            <set>Qt::AlignmentFlag::AlignCenter</set>
