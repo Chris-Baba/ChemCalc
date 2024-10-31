@@ -1,12 +1,11 @@
-#include <QtGui>
 #include <QSql>
-#include <QtSql>
 #include <QMap>
 #include <QSqlRecord>
 #include <QSqlDatabase>
 #include <QSqlTableModel>
 #include <QSqlQuery>
 #include <QSqlQueryModel>
+
 #include <QTableView>
 #include <QAbstractItemModel>
 #include <QAbstractItemView>
@@ -21,11 +20,8 @@
 #include <QPrintDialog>
 #include <QDialog>
 #include <QLabel>
-#include <QtWidgets>
 #include <QMainWindow>
 #include <QObject>
-#include <QtGui>
-#include <QtCore>
 
 #include <QRadioButton>
 #include <QLineEdit>
@@ -33,6 +29,7 @@
 #include <QFile>    //REMOVE?
 #include <QFileDialog>  //REMOVE?
 #include <QTextStream>  //REMOVE?
+
 #include <QDebug>
 #include <QTextEdit>
 #include <QVariant>
@@ -50,10 +47,15 @@ Select_Dialog::Select_Dialog(QWidget *parent)
     qDebug() << "Select_Dialog::Select_Dialog Constructor - STARTED";
     setWindowTitle("Select From Database - ChemCalc");
 
-    Select_Dialog::g_db = QSqlDatabase::addDatabase("QSQLITE");
-    g_db.setDatabaseName(MainWindow::g_dataBaseFilePath);
+    qDebug() << "In select_dialog constructor, g_db.isValid() = " <<
+                MainWindow::g_db.isValid();
+    if (!MainWindow::g_db.isValid()){
+        qDebug() << "In select_dialog -B";
+        MainWindow::g_db = QSqlDatabase::addDatabase("QSQLITE");
+    }
+    MainWindow::g_db.setDatabaseName(MainWindow::g_dataBaseFilePath);
 
-    bool DB_opened_OK = g_db.open();
+    bool DB_opened_OK = MainWindow::g_db.open();
     qDebug() << "DB_opend_OK = " << DB_opened_OK;
     if (DB_opened_OK == false) {
         MainWindow myObj;

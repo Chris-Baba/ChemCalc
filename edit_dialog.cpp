@@ -1,6 +1,4 @@
-#include <QtGui>
 #include <QSql>
-#include <QtSql>
 #include <QSqlRecord>
 #include <QSqlDatabase>
 #include <QSqlTableModel>
@@ -20,11 +18,8 @@
 #include <QPrintDialog>
 #include <QDialog>
 #include <QLabel>
-#include <QtWidgets>
 #include <QMainWindow>
 #include <QObject>
-#include <QtGui>
-#include <QtCore>
 
 #include <QRadioButton>
 #include <QLineEdit>
@@ -49,6 +44,10 @@ QString Edit_Dialog::g_mw_string = "0.0";
 QSqlTableModel* Edit_Dialog::model = NULL;
 int Edit_Dialog::g_selected_row = 0;
 int Edit_Dialog::g_selected_column = 0;
+
+// Setup database connection outside of any function.
+//QSqlDatabase MainWindow::g_db = QSqlDatabase::addDatabase("QSQLITE", \
+                                                          "dbConnection");
 //--------------------------------------
 
 Edit_Dialog::Edit_Dialog(QWidget *parent)
@@ -60,18 +59,29 @@ Edit_Dialog::Edit_Dialog(QWidget *parent)
     qDebug() << "Edit_Dialog::Edit_Dialog Constructor - STARTED";
     setWindowTitle("Edit Database");
     // QSqlDatabase db;
-    g_db = QSqlDatabase::addDatabase("QSQLITE");
-    // QString 'g_dataBaseFilePath' is static class scope, declared in MainWindow header file.
-    g_db.setDatabaseName(MainWindow::g_dataBaseFilePath);
-    qDebug() << "In Edit_Dialog, g_dataBaseFilePath = " << MainWindow::g_dataBaseFilePath;
 
-    bool DB_opened_OK = g_db.open();
-    qDebug() << "DB_opend_OK = " << DB_opened_OK;
-    if (DB_opened_OK == false) {
-        qDebug() << "Unable to connect to the database";
-        MainWindow myObj;
-        myObj.cc_msgBox("Unable to connect to the local database");
-        return;
+    qDebug() << "In Edit_Dialog, g_db.isValid() = " <<
+        MainWindow::g_db.isValid();
+    if (!MainWindow::g_db.isValid()){
+        qDebug() << "In db_save -B";
+        MainWindow::g_db = QSqlDatabase::addDatabase("QSQLITE");
+    }
+
+    // MainWindow::g_db = QSqlDatabase::addDatabase("QSQLITE");
+    // QString 'g_dataBaseFilePath' is static class scope, declared in MainWindow header file.
+    MainWindow::g_db.setDatabaseName(MainWindow::g_dataBaseFilePath);
+    qDebug() << "In Edit_Dialog, g_dataBaseFilePath = " << \
+                MainWindow::g_dataBaseFilePath;
+
+    if (!MainWindow::g_db.isOpen()){
+        bool DB_opened_OK = MainWindow::g_db.open();
+        qDebug() << "DB_opend_OK = " << DB_opened_OK;
+        if (DB_opened_OK == false) {
+            qDebug() << "Unable to connect to the database";
+            MainWindow myObj;
+            myObj.cc_msgBox("Unable to connect to the local database");
+            return;
+        }
     }
     model = new QSqlTableModel(this);
     model->setTable("USER");

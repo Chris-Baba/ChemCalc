@@ -31,14 +31,13 @@ public:
     //These declarations have class(?) scope,
     // Use scope resolution operator (::) to use these public variables.
     // For example: "Edit_Dialog::g_selected_row".
-    QSqlDatabase g_db;
+
     int g_selected_row;
     int g_selected_column;
-    // QString g_reagent;
-    // double g_mw;
     int g_OK_clicked;
     QSqlTableModel *model;
     QTableView *view;
+    //QSqlDatabase g_db;
 
     //------------------------------------------------
 public slots:

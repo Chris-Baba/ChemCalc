@@ -39,6 +39,9 @@ if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
         COPYING.txt
         chemcalc.desktop
         chemcalc_icon_120.svg
+        preferences_dialog.h
+        preferences_dialog.cpp
+        preferences_dialog.ui
     )
 
 # Define target properties for Android with Qt 6 as:

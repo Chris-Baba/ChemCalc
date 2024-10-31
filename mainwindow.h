@@ -11,6 +11,8 @@
 #include "qnetworkreply.h"
 #include "qsqltablemodel.h"
 #include "qtableview.h"
+#include "preferences_dialog.h"
+
 
 QT_BEGIN_NAMESPACE
 namespace Ui {
@@ -29,8 +31,11 @@ public:
 
     friend class Select_Dialog;
     friend class Edit_Dialog;
+    friend class Preferences_Dialog;
 
-    void cc_msgBox(QString msgText, QString msgText2 ="", QString msgText3="", MainWindow *parent = nullptr);
+    void cc_msgBox(QString msgText, QString msgText2 ="", QString msgText3="", \
+                    MainWindow *parent = nullptr);
+
     void on_pushButton_DeleteRow_clicked();
     QString read_starting_reagent();
     int db_Save(QString reagent_name, QString mw, bool skipConfirmationMessage=false);
@@ -45,7 +50,10 @@ public:
     bool g_strictSearch;
     static QString g_dataBaseFilePath;
     static QString g_configFilePath;
-    static QSettings g_ccSettings;
+    static bool g_NetworkAccessPermission;
+    static bool g_NetworkAccessAsked;
+    static bool g_NetworkAccessDontAskAgain;
+    static QSqlDatabase g_db;
 
     void entrezQuery1(QString myReagentText, bool strictSearch);
     void entrezQuery2(entrezData myEntrezDataStruct);
@@ -108,6 +116,11 @@ private slots:
     void runAtStart();
     bool checkForDataBase();
     bool checkForConfigurationFile();
+
+    static QString parseConfigFile(QString searchTerm, bool replace, \
+                                   bool replacementTerm);
+    void setConfigGlobals();
+    void on_actionPreferences_triggered();
 
 private:
 

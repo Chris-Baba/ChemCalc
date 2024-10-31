@@ -2,12 +2,10 @@
 #define EDIT_DIALOG_H
 
 #include <QDialog>
-#include <QtGui>
 #include <QSql>
 #include <QObject>
 #include <QSqlTableModel>
 #include <QTableView>
-
 
 namespace Ui {
 class Edit_Dialog;
@@ -23,13 +21,13 @@ public:
     explicit Edit_Dialog(QWidget *parent = nullptr);
     ~Edit_Dialog();
     Ui::Edit_Dialog *ui3;
-    // void chem_db_read(QString reagent_fragment);
 
     //------------------------------------------------
     //These declarations have class(?) scope,
     // Use scope resolution operator (::) to use these public variables.
     // For example: "Edit_Dialog::g_selected_row".
-    QSqlDatabase g_db;
+
+    // QSqlDatabase g_db;  // Delete?
     static int g_selected_row;
     static int g_selected_column;
     static QString g_reagent;

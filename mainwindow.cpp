@@ -5,6 +5,7 @@
 #include <QLabel>
 #include <QWidget>
 #include <QButtonGroup>
+
 #include <QIcon>
 #include <QIconEngine>
 #include <QWindow>  //??
@@ -13,12 +14,14 @@
 #include <QTabWidget>
 #include <QSqlQuery>
 #include <QSqlQueryModel>
+
 #include <QRadioButton>
 #include <QLineEdit>
 #include <QMessageBox>
 #include <QFile>
 #include <QDir>
 #include <QResource>
+
 #include <QFileDialog>  //REMOVE?
 #include <QTextStream>  //REMOVE?
 #include <QDebug>
@@ -31,6 +34,7 @@
 #include <QAbstractItemModel>
 #include <QAbstractItemView>
 #include <QAbstractTableModel>
+
 #include <QDesktopServices>
 #include <QGuiApplication> //?
 #include <QUrl>
@@ -43,6 +47,7 @@
 #include <QNetworkAccessManager>
 #include <QXmlStreamReader>
 #include <QXmlStreamEntityDeclaration>
+
 #include <QDomDocument>
 #include <QDomElement>
 #include <QDomEntity>
@@ -63,14 +68,21 @@
 #include "about_dialog.h"
 #include "mprintdialog.h"
 #include "edit_dialog.h"
+
+#include "preferences_dialog.h"
 #include "select_dialog.h"
 #include "ui_about_dialog.h"
 #include "ui_select_dialog.h"
 
-// Declare some variables.
+// Declare some global variables.--------------------
 QString MainWindow::g_dataBaseFilePath = "";
 QString MainWindow::g_configFilePath = "";
-//---------------------------------------
+
+bool MainWindow::g_NetworkAccessPermission = true;
+bool MainWindow::g_NetworkAccessAsked = false;
+bool MainWindow::g_NetworkAccessDontAskAgain = false;
+//---------------------------------------------
+
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
@@ -79,8 +91,39 @@ MainWindow::MainWindow(QWidget *parent)
     ui->setupUi(this);
 
     setWindowTitle("Chemical Calculator");
+
     // Runs once at start, to setup file locations, database, config files etc.
     runAtStart();
+
+    // "g_db" is declared in main.cpp outside of any function.
+    //--------------Copied from Edit_Dialog------
+    qDebug() << "In MainWindow constructor-A";
+    qDebug() << "In MainWindow constructor-A2, g_db.isValid() = " <<
+                g_db.isValid();
+    if (!g_db.isValid()){
+        qDebug() << "In MainWindow constructor-A3";
+        MainWindow::g_db = QSqlDatabase::addDatabase("QSQLITE");
+    }
+    // MainWindow::g_db = QSqlDatabase::addDatabase("QSQLITE");
+    qDebug() << "In MainWindow constructor-B";
+    // QString 'g_dataBaseFilePath' is static class scope,
+    // declared in MainWindow header file.
+    MainWindow::g_db.setDatabaseName(MainWindow::g_dataBaseFilePath);
+    qDebug() << "In MainWindow constructor, g_dataBaseFilePath = " << \
+        MainWindow::g_dataBaseFilePath;
+
+    if (!MainWindow::g_db.isOpen()){
+        bool DB_opened_OK = MainWindow::g_db.open();
+        qDebug() << "DB_opend_OK = " << DB_opened_OK;
+        if (DB_opened_OK == false) {
+            qDebug() << "Unable to connect to the database";
+            MainWindow myObj;
+            qDebug() << "In MainWindow constructor-C";
+            myObj.cc_msgBox("Unable to connect to the local database");
+            return;
+        }
+    }
+    qDebug() << "In MainWindow constructor-END";
 }
 
 MainWindow::~MainWindow()
@@ -88,26 +131,90 @@ MainWindow::~MainWindow()
     delete ui;
 }
 
-void MainWindow::runAtStart()
-{
+void MainWindow::runAtStart() {
     // Runs once at start, to setup file locations, database, config files etc.
     qDebug() << "runAtStart STARTED.";
 
     // 1) check for database.------
     bool dbOK = checkForDataBase();
     qDebug() << "dbOK = " << dbOK;
-    if (!dbOK){
+    if (!dbOK) {
         // Add error code here.
     }
 
-    // 2) check for configuration file.------
-    // FOR FUTURE USE!
-    //
-    // bool configOK = checkForConfigurationFile();
-    // qDebug() << "configOK = " << configOK;
-    // if (!configOK){
-        // Add error code here.
-    // }
+    // 2) check for or make configuration file.------
+    bool configOK = checkForConfigurationFile();
+    qDebug() << "configOK = " << configOK;
+
+    // ---For Testing----------
+    // Remember the final space (for name search).
+    // Only change last bool (value), first bool means replace.
+    // parseConfigFile("NetworkAccessPermission ", true, true);
+    // parseConfigFile("NetworkAccessAsked ", true, true);
+    // parseConfigFile("NetworkAccessDontAskAgain ", true, true);
+    //-----------------
+
+    // 3) Set Configuration Globals.
+    // This reads the configuration file and sets the following
+    // three global variables:
+    //   (bool) g_NetworkAccessDontAskAgain
+    //   (bool) g_NetworkAccessAsked
+    //   (bool) g_NetworkAccessPermission
+
+    qDebug() << "In runAtStart A g_NetworkAccessPermission = "
+             << g_NetworkAccessPermission;
+    qDebug() << "In runAtStart A g_NetworkAccessAsked = "
+             << g_NetworkAccessAsked;
+    qDebug() << "In runAtStart A g_NetworkAccessDontAskAgain = "
+             << g_NetworkAccessDontAskAgain;
+
+    if (configOK) {
+        setConfigGlobals();
+    }
+
+    // 4) Ask for network access permission, if needed.
+
+    qDebug() << "In runAtStart B g_NetworkAccessPermission = "
+             << g_NetworkAccessPermission;
+    qDebug() << "In runAtStart B g_NetworkAccessAsked = "
+             << g_NetworkAccessAsked;
+    qDebug() << "In runAtStart B g_NetworkAccessDontAskAgain = "
+             << g_NetworkAccessDontAskAgain;
+
+    if ((g_NetworkAccessAsked == false) or
+        ((g_NetworkAccessDontAskAgain == false) and
+        (g_NetworkAccessPermission == false))) {
+        // Ask for permission to access PubChem via internet.
+        // If permission granted set all 3 globals aove to true.
+        // Use a timer to wait 1000ms so MainWindow constructor completes.
+        QTimer::singleShot(1000, this, &MainWindow::on_actionPreferences_triggered);
+    }
+    setConfigGlobals();
+    qDebug() << "In runAtStart C g_NetworkAccessPermission = "
+             << g_NetworkAccessPermission;
+    qDebug() << "In runAtStart C g_NetworkAccessAsked = "
+             << g_NetworkAccessAsked;
+    qDebug() << "In runAtStart C g_NetworkAccessDontAskAgain = "
+             << g_NetworkAccessDontAskAgain;
+
+    /*--------Future Use-------
+    // Testing retriving maps.
+    // suffix_molar_map_A2 =  {{"M",1}, {"mM",1e3}, {"uM",1e6}, {"nM",1e9},
+    // {"pM",1e12}, {"fM",1e15}};
+    QString myMapString =
+        parseConfigFile("suffix_molar_map_A2", false, "CB_TEST");
+    // Replace
+    myMapString = "{{'M',1}, {'mM',1e3}, {'uM',1e6}, {'nM',1e9}, {'pM',1e12}, {'fM',1e15}}";
+    qDebug() << "myMapString = " << myMapString;
+
+    QList<QString> myMapList(myMapString);
+    qDebug() << "myMapList = " << myMapList;
+    QMap<QString, double> myMap_A2;
+    // myMap_A2.insert(myMapList);
+    // for ( ;  begin !=  end ; ++ begin )
+     qDebug() << "myMap_A2 = " << myMap_A2;
+     //----------------
+    */
 }
 
 bool MainWindow::checkForDataBase()
@@ -159,7 +266,7 @@ bool MainWindow::checkForDataBase()
     return true;
 }
 
-bool MainWindow::checkForConfigurationFile()  // For future use!
+bool MainWindow::checkForConfigurationFile()
 {
     // Checks for existence of ChemCalc.conf and paths to it.
     // ("$HOME/.config/ChemCalc" on my linux computer.)
@@ -170,7 +277,8 @@ bool MainWindow::checkForConfigurationFile()  // For future use!
     // See Qt QStandardPaths Class docs.
     // Returns 1 directory OR an empty string, but is writable if returned.
     // It may need to be created, but is writable.
-    QString myConfigLocation = QStandardPaths::writableLocation(QStandardPaths::AppConfigLocation);
+    QString myConfigLocation = QStandardPaths::writableLocation\
+        (QStandardPaths::AppConfigLocation);
     qDebug() << "myConfigLocation (writableLocation) = " << myConfigLocation;
 
     // If config directories don't exist, create them.
@@ -186,7 +294,8 @@ bool MainWindow::checkForConfigurationFile()  // For future use!
     // QString 'g_configFilePath' is static class scope, declared in header file.
     g_configFilePath = myConfigLocation + "/ChemCalc.conf";
     QFile myConfig = QFile(g_configFilePath);
-    // If configuration file doesn't exist in users file system, create by copying resource configuration.
+    // If configuration file doesn't exist in user's file system, create
+    // by copying resource configuration.
     if (!myConfig.exists()){
         // Copy configuration in resource file to user's file system.
         // resource file = :/ChemCalc.conf  (notice ":" at start).
@@ -200,9 +309,9 @@ bool MainWindow::checkForConfigurationFile()  // For future use!
 
             // Don't use QSettings as it mangles (deletes) comments.
             // Also set g_ccSettings (to use QSettings methods).
-              // QSettings g_ccSettings(g_configFilePath, QSettings::IniFormat);
+            // QSettings g_ccSettings(g_configFilePath, QSettings::IniFormat);
             // testing-------------<<--------FINISH HERE--------------------------
-            // g_ccSettings.beginGroup("MyGroup");
+            // g_ccSettings.beginGroup("FirstRun");
             // g_ccSettings.setValue("myQString1", "Molar");
             // g_ccSettings.setValue("myQString2", "Micro-Molar");
             // g_ccSettings.endGroup();
@@ -216,6 +325,116 @@ bool MainWindow::checkForConfigurationFile()  // For future use!
         }
     }
     return true;
+}
+
+QString MainWindow::parseConfigFile(QString searchTerm, bool replace=false, bool replacementTerm=true)
+{
+    // NOTE: WORKS, BUT VERY UGLY CODE!
+    // ---Single argumnet mode (find)------
+    // Parse ($HOME/.config/ChemCalc/ChemCalc.conf) for searchTerm.
+    // Returns QString of line after equals sign of matching searchTerm,
+    // or "NOT FOUND" on error or not found.
+    //
+    // ----Triple argument mode (find and replace)------
+    // If "replace" is set to true then the "searchTerm" is replaced by
+    // "replaceTerm" in the user's config file (and returns "replaceTerm).
+    //
+    // These 3 (bool) items (Return QString of "True" or "False", which
+    // must be converted to bool (true or false) lower case after return.
+    // 1) g_NetworkAccessPermission  (in file: "NetworkAccessPermission = False").
+    // 2) g_NetworkAccessAsked
+    // 3) g_NetworkAccessDontAskAgain
+
+    QFile file(g_configFilePath);
+    if (!file.open(QIODevice::ReadWrite | QIODevice::Text)){
+        return QString("FILE OPEN ERROR-NOT FOUND");  //Return if file open error.
+    }
+
+    while (!file.atEnd()) {
+        int lineStartPosition = file.pos();
+        QString line = file.readLine();
+        // do pre-processing
+        // Skip comment lines (# and //) and newlines (\n).
+        if (!(line.startsWith("#")) and
+            (!line.startsWith("\n")) and
+            (!line.startsWith("//"))){
+            // Trim trailing newlines ("\n").
+            if (line.endsWith("\n")){
+                line.removeLast();  // Note that "\n" counts as one character.
+            }
+            // Check for equals sign.
+            if (line.contains("=")){
+                // Do processing.
+                // qDebug() << "In parseConfigFile: Config File Pos/Line = " << \
+                    lineStartPosition << line;
+                if (line.contains(searchTerm)){
+                    qDebug() << "In parseConfigFile,Found Search Term: " \
+                             << searchTerm << "at position " << file.pos();
+                    // Replace term if called.
+                    if (replace==true){
+                        file.seek(lineStartPosition + line.indexOf("=") + 1);
+                        if (replacementTerm==true){
+                            file.write(" True \n");
+                            return "True";
+                        }
+                        // Is false:
+                        else {
+                            file.write("False \n");
+                            return "False";
+                        }
+                    }
+
+                    // Get text after equals sign
+                    QString answer = line.section("=" , 1);
+                    return answer; //return answer
+                }
+            }
+        }
+    }
+    // If everything fails return "NOT FOUND".
+    return QString("In parseConfigFile: NOT FOUND-B");  //Return if file open error.
+}
+
+void MainWindow::setConfigGlobals(){
+    // Parse configuration file for 3 network access variables.
+    // (g_NetworkAccessPermission, g_NetworkAccessAsked etc.)
+    // Note: Append space to searchTerm to prevent longer matching strings.
+    QString text1 = parseConfigFile("NetworkAccessPermission ");
+    QString text2 = parseConfigFile("NetworkAccessAsked ");
+    QString text3 = parseConfigFile("NetworkAccessDontAskAgain ");
+    qDebug() << "NetworkAccessPermission = " << text1;
+    qDebug() << "NetworkAccessAsked = " << text2;
+    qDebug() << "NetworkAccessDontAskAgain = " << text3;
+
+    //-------------
+    if (text1.contains("True", Qt::CaseInsensitive)){
+        g_NetworkAccessPermission = true;
+        qDebug() << "In setConfigGlobals Q: g_NetworkAccessPermission = " \
+            << g_NetworkAccessPermission;
+    }
+    else {
+        // Anything except "True" or "true" is false by default (inc. null).
+        g_NetworkAccessPermission = false;
+        qDebug() << "In setConfigGlobals R: g_NetworkAccessPermission = " \
+                 << g_NetworkAccessPermission;
+    }
+    //-------------
+    if (text2.contains("True", Qt::CaseInsensitive)){
+        g_NetworkAccessAsked = true;
+    }
+    else {
+        // Anything except "True" or "true" is false by default (inc. null).
+        g_NetworkAccessAsked = false;
+    }
+    //----------
+    if (text3.contains("True", Qt::CaseInsensitive)){
+        g_NetworkAccessDontAskAgain = true;
+    }
+    else {
+        // Anything except "True" or "true" is false by default (inc. null).
+        g_NetworkAccessDontAskAgain = false;
+    }
+    //----------
 }
 
 void MainWindow::on_pushButton_Quit_clicked()
@@ -236,7 +455,7 @@ void MainWindow::on_actionChemCalc_Help_triggered()
     ccHelp->setWindowFlag(Qt::Window);
     ccHelp->setWindowModality(Qt::NonModal);
     ccHelp->setSource(QUrl("qrc:/ChemCalc_help1.md"));
-    ccHelp->resize(740,700);  // WxH adjust W for width of images + 40.
+    ccHelp->resize(500,700);  // WxH adjust W for width of images + 40.
     ccHelp->show();
 }
 
@@ -273,24 +492,35 @@ void MainWindow::cc_msgBox(QString msgText, QString msgText2, QString msgText3, 
 int MainWindow::db_Save(QString reagent_name , QString mw_string, bool skipConfirmationMessage)
 {
     // This is mostly used for 'Save MW' button.
-    // If no matches in db, insert new row of data.
+    // If no matches in db (database), insert new row of data.
     // If 1 or more matches in db, notify and return with db unchanged.
 
-    qDebug() << "db_query::db_connect - STARTED";
-    QSqlDatabase db;
-    db = QSqlDatabase::addDatabase("QSQLITE");
-    // db.setDatabaseName(":/CC/DB1/ChemCalc_data.db");  //FIX HERE-----------
-    // db.setDatabaseName("/home/chris/Cpp-Projects/ChemCalc/ChemCalc_data.db");
-    db.setDatabaseName(g_dataBaseFilePath);
-
-    bool DB_opened_OK = db.open();
-    qDebug() << "DB_opend_OK = " << DB_opened_OK;
-    if (DB_opened_OK == false) {
-        MainWindow::cc_msgBox("Unable to connect to the database","","",this);
-        qDebug() << "Unable to connect to the database";
-        return -2;   //An error condition.
+    qDebug() << "In db_Save - STARTED";
+    qDebug() << "In db_Save, g_db.isValid() = " <<
+        g_db.isValid();
+    if (!g_db.isValid()){
+        qDebug() << "In db_save -B";
+        MainWindow::g_db = QSqlDatabase::addDatabase("QSQLITE");
     }
 
+    //g_db= QSqlDatabase::addDatabase("QSQLITE");
+    // "g_db" is global from MainWindow header file.
+    g_db.setDatabaseName(g_dataBaseFilePath);
+    qDebug() << "In db_Save - B";
+
+    if (!g_db.isOpen()){
+        qDebug() << "In db_Save - C";
+        bool DB_opened_OK = g_db.open();
+        qDebug() << "DB_opend_OK = " << DB_opened_OK;
+        if (DB_opened_OK == false) {
+            MainWindow::cc_msgBox("Unable to connect to the database","","",this);
+            qDebug() << "Unable to connect to the database";
+        return -2;   //An error condition.
+        }
+    }
+    else qDebug() << "In db_Save - D";
+
+    qDebug() << "In db_Save - E";
     // Correct short version for sqlite and Qt.
     QString sql = ("reagent LIKE '" + reagent_name + "'");  // Query needs an exact match.
     qDebug() << "sql = " << sql;
@@ -328,13 +558,13 @@ int MainWindow::db_Save(QString reagent_name , QString mw_string, bool skipConfi
                   this);
         }
     }
+    g_db.close();
     return myNumRows;
 }
 
 void MainWindow::on_pushButton_Show_clicked()
 {
     // Shows 'print list' (Dialog Box).
-
     // mPrintDialog *pd is declared in header file (MainWindow.h).
     pd->show();
 }
@@ -384,7 +614,7 @@ double MainWindow::validate_raw_number(QString raw_num)
     qDebug() << "Running 'validate_raw_number' function RETURNED double = " << validated_num;
     if(ok and (validated_num >= 0.0)) {return validated_num;}
     else {
-        cc_msgBox("Number validation error.");
+        cc_msgBox("Number validation error.","","",this);
         return -1;}
 }
 
@@ -669,11 +899,16 @@ QString MainWindow::read_starting_reagent()
     QString raw_starting_reagent = ui->textEdit_StartingReagent->toPlainText();
     qDebug() << "raw_starting_reagent = " << raw_starting_reagent;
 
+    // If 'Starting Reagent' text box is empty, return "Unknown Reagent".
+    qDebug() << "In read_starting_reagent, Starting Reagent box is empty.";
+    if (raw_starting_reagent == ""){
+        return "Unknown Reagent";
+    }
     // On first click of 'Starting Reagent' text box, clear original text.
     qDebug() << "Clearing Starting Reagent defauilt text.";
     if (raw_starting_reagent == "Enter reagent name here."){
         ui->textEdit_StartingReagent->setPlainText("");  //Clear text box.
-        return "Unnamed Reagent";
+        return "Unknown Reagent";
     } return raw_starting_reagent;
 }
 
@@ -1144,16 +1379,26 @@ void MainWindow::on_pushButton_FindMW_clicked()
 
     if (rowCount <=0){
         // No local results, do a PubChem (Enterez) search <-----------FINISH ME-----
-        on_actionEnterez_Search_triggered(true);
-        // Line above returns BEFORE search is fully completed.
-        // NOTE: A race condition exists here if code continues! <----------
-        // Follow code at end of query (processReturnedText2()) to continue.
-        return; // End now to prevent race condition.
+        if (g_NetworkAccessPermission==true){
+            on_actionEnterez_Search_triggered(true);
+            // Line above returns BEFORE search is fully completed.
+            // NOTE: A race condition exists here if code continues! <----------
+            // Follow code at end of query (processReturnedText2()) to continue.
+            return; // End now to prevent race condition.
+        }
+        else {
+            // If no internet access is granted to search PubMed.
+            cc_msgBox("No results were found in your local database, and your preferences prohibit internet access to search on PubMed.",
+                      "You can change this under 'Edit-Preferences'",
+                      "",
+                      this);
+            return;
+        }
     }
     if (rowCount >20){
         // Too many results.
         cc_msgBox("Too many matching reagents were found.",
-                  "Please narrow you search by typing a longer reagent name",
+                  "Please narrow you search by typing a longer reagent name.",
                   "",
                   this);
     }
@@ -1177,7 +1422,7 @@ void MainWindow::on_pushButton_SaveMW_clicked()
     qDebug() << "save_MW of " << reagent_name;
     if (reagent_name == "Unknown Reagent"){
         // Error message and DON'T SAVE.
-        cc_msgBox("Please enter a reagent name.");
+        cc_msgBox("Please enter a reagent name.","","",this);
         return;
     }
 
@@ -1281,7 +1526,7 @@ void MainWindow::on_actionEnterez_Search_triggered(bool strictSearch = true)
     QUrl entrezURL(urlAComplete);
     // If no internet connection.
     if (!entrezURL.isValid()){
-        cc_msgBox("Could not establish an internet connection to PubChem databases.");
+        cc_msgBox("Could not establish an internet connection to PubChem databases.","","",this);
         qDebug() << "entrezURL is NOT valid. = " << entrezURL;
         entrezURL.clear();  // You need to clear QUrl on failure.
         return;  // End entire function.
@@ -1321,7 +1566,7 @@ void MainWindow::replyFinished1(QNetworkReply *reply1)
 
 MainWindow::entrezData MainWindow::processReturnedText1(QByteArray myByteArray1)
 {
-    //This returns a 'entrezData' struct of 2 data items and 1 Qlist obtained from the network response mByteArray.
+    //This returns a 'entrezData' struct of 2 data items and 1 Qlist obtained from the network response myByteArray1.
     qDebug() << "processReturnedText1 called";
     auto toUtf16 = QStringDecoder(QStringDecoder::Utf8);
     QString myString = toUtf16(myByteArray1);
@@ -1412,7 +1657,7 @@ void MainWindow::entrezQuery2(entrezData myEntrezDataStruct)
 
     // If no internet connection.
     if (!entrezURL2.isValid()){
-        cc_msgBox("Could not establish an internet connection to PubChem databases.");
+        cc_msgBox("Could not establish an internet connection to PubChem databases.","","",this);
         qDebug() << "entrezURL2 is NOT valid. = " << entrezURL2;
         entrezURL2.clear();  // You need to clear QUrl on failure.
         return;  // End entire function.
@@ -1639,8 +1884,32 @@ void MainWindow::on_actionOpen_PubChem_Website_triggered()
     // Open PubChem website in users browser.
     bool OK = QDesktopServices::openUrl(QUrl("https://pubchem.ncbi.nlm.nih.gov/"));
     if (!OK){
-        cc_msgBox("Unknown internet or web browser error.");
+        cc_msgBox("Unknown internet or web browser error.","","",this);
     }
 }
 
+void MainWindow::on_actionPreferences_triggered()
+{
+    // Called from "Edit / Preferences" menu or first start.
+    // Displays preferences_dialog and
+    // allows user to set some global variables.
+    qDebug() << "on_actionPreferences_triggered()";
+
+
+    // parseConfigFile("NetworkAccessPermission ", true, true);
+    // parseConfigFile("NetworkAccessAsked ", true, true);
+    // parseConfigFile("NetworkAccessDontAskAgain ", true, true);
+
+    setConfigGlobals();
+    qDebug() << "In on_actionPreferences_triggered: g_NetworkAccessPermission = "
+             << g_NetworkAccessPermission;
+    qDebug() << "In on_actionPreferences_triggered: g_NetworkAccessAsked = "
+             << g_NetworkAccessAsked;
+    qDebug() << "In on_actionPreferences_triggered: g_NetworkAccessDontAskAgain = "
+             << g_NetworkAccessDontAskAgain;
+
+    Preferences_Dialog *myPreferencesDialog = new Preferences_Dialog(this);
+    myPreferencesDialog->open();
+
+}
 

@@ -1,8 +1,17 @@
-#include "mainwindow.h"
-
 #include <QApplication>
 #include <QGuiApplication> //?
 #include <QDebug>
+#include <QCommandLineParser>
+#include <QCoreApplication>
+#include <QLoggingCategory>
+
+#include "mainwindow.h"
+
+//--------------------------------------------------------
+// Declare database connection outside of any function. It
+//  also needs "include QCoreApplication" environment.
+QSqlDatabase MainWindow::g_db;
+//--------------------------------------------------------
 
 int main(int argc, char *argv[])
 {
@@ -21,7 +30,8 @@ int main(int argc, char *argv[])
     verbose = parser.isSet(verboseOption);
     if (!verbose){
         // This turns off qDebug messages in all chemcalc code.
-        QLoggingCategory::setFilterRules("*.debug=false");
+        // Comment out next line (and revert when done) for IDE debugging.
+        QLoggingCategory::setFilterRules("*.debug=false");  //<-- UNCOMMENT <<--<<--
     };
     //----
 

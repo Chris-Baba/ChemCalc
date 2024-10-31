@@ -605,6 +605,7 @@ li.checked::marker { content: &quot;\2612&quot;; }
      <string>Edit</string>
     </property>
     <addaction name="actionDatabase"/>
+    <addaction name="actionPreferences"/>
    </widget>
    <widget class="QMenu" name="menuHelp">
     <property name="title">
@@ -633,19 +634,6 @@ li.checked::marker { content: &quot;\2612&quot;; }
     <string>Edit Database</string>
    </property>
   </action>
-  <action name="actionPreferences">
-   <property name="text">
-    <string>&amp;Preferences</string>
-   </property>
-  </action>
-  <action name="actionClose">
-   <property name="text">
-    <string>Close</string>
-   </property>
-   <property name="toolTip">
-    <string>File Close</string>
-   </property>
-  </action>
   <action name="actionChemCalc_Help">
    <property name="text">
     <string>&amp;ChemCalc Help</string>
@@ -664,11 +652,6 @@ li.checked::marker { content: &quot;\2612&quot;; }
     <enum>QAction::MenuRole::TextHeuristicRole</enum>
    </property>
   </action>
-  <action name="actionSearch_Local_Database">
-   <property name="text">
-    <string>&amp;Search Local Database</string>
-   </property>
-  </action>
   <action name="actionOpen_PubChem_Website">
    <property name="text">
     <string>&amp;Open PubChem Website</string>
@@ -679,28 +662,16 @@ li.checked::marker { content: &quot;\2612&quot;; }
     <string>&amp;Enterez Search</string>
    </property>
   </action>
+  <action name="actionPreferences">
+   <property name="text">
+    <string>Preferences</string>
+   </property>
+  </action>
  </widget>
  <resources>
   <include location="resources.qrc"/>
  </resources>
- <connections>
-  <connection>
-   <sender>actionClose</sender>
-   <signal>triggered()</signal>
-   <receiver>MainWindow</receiver>
-   <slot>close()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>-1</x>
-     <y>-1</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>319</x>
-     <y>280</y>
-    </hint>
-   </hints>
-  </connection>
- </connections>
+ <connections/>
  <slots>
   <signal>signal1_CB()</signal>
   <slot>slot1()</slot>
