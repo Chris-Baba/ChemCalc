@@ -3,7 +3,7 @@
 # When updating versions change 'pkgver', 'pkgrel' (if needed), and 'sha256sums.
 
 pkgname=chemcalc
-pkgver=0.1.3
+pkgver=0.9.0
 pkgrel=1
 pkgdesc='A chemical calculator that calculates the amount of reagents to use when making solutions.'
 arch=('x86_64')
@@ -60,7 +60,7 @@ makedepends=('cmake')
 # source=("https://github.com/Chris-Baba/ChemCalc/archive/refs/tags/v0.1.2.tar.gz")
 source=("https://github.com/Chris-Baba/ChemCalc/archive/refs/tags/v${pkgver}.tar.gz")
 
-sha256sums=('c1f1b81829a94e25712522389490c6e5999167553e2c9571f733fcd994a085c9')
+sha256sums=('66d8866ce04e6c2e7a976b31ae72ff2d67e8a52fe39352933fd4ffd36aa809db')
 
 build() {
     cmake \
