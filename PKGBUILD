@@ -65,13 +65,15 @@ source=("${pkgname}-${pkgver}.tar.gz::https://github.com/Chris-Baba/ChemCalc/arc
 
 sha256sums=('db535a1069ccaed50d6b0b965becc0357f44583ab235f7c77d7b37433b18b4c1')
 
+options=(!debug)
+
 build() {
     cmake \
         -B build \
         -S ChemCalc-${pkgver} \
         -DCMAKE_BUILD_TYPE=Release \
         -DCMAKE_INSTALL_PREFIX:PATH='/usr' \
-        -Wno-dev
+        #-Wno-dev
     cmake --build build
 }
 
